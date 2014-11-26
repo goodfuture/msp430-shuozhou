@@ -1,0 +1,123 @@
+//*****************************************************************
+//  XLINK command file for the MSP430 IAR C/EC++ Compiler
+//
+//  This is the XLINK command file for the MSP430FG4618
+//  microprocessor.
+//
+//  Copyright 1996-2006 IAR Systems. All rights reserved.
+//
+//  Usage:  xlink  your_file(s)  -f lnk430FG4618  cl430xxx
+//
+//  $Revision: 1.8 $
+//
+//*****************************************************************
+
+
+//*****************************************************************
+//  The following segments are defined in this linker command file:
+//
+//  Data read/write segments (RAM)
+//  ==============================
+//
+//  segment     address range   usage
+//  -------     -------------   --------------------------
+//  DATA16_I    1100-30FF       Initialized variables
+//  DATA16_Z    1100-30FF       Zero initialized variables
+//  DATA16_N    1100-30FF       Uninitialized variables
+//  CSTACK      1100-30FF       Run-time stack/auto variables
+//  HEAP        1100-30FF       The heap used by malloc and free
+//
+//
+//  Program and non-volatile segments (FLASH)
+//  =========================================
+//
+//  segment     address range   usage
+//  -------     -------------   --------------------------
+//  INFO        1000-10FF       Information memory
+//  CSTART      3100-FFDF       cstartup program code
+//              10000-1FFFF
+//  CODE        3100-FFBE       Program code
+//              10000-1FFFF
+//  ISR_CODE    3100-FFDF       Interrupt service routines, must be placed in 16-bit 
+//                              memory
+//              10000-1FFFF
+//  TAIVINT     3100-FFDF       Timer A interrupt vector generator support code
+//  DATA16_C    3100-FFDF       Constant "const" variables AND String literals
+//              10000-1FFFF
+//  DATA16_ID   3100-FFDF       Initializers for DATA16_I
+//              10000-1FFFF
+//  DIFUNCT     3100-FFDF       Dynamic initialization vector used by C++
+//              10000-1FFFF
+//  CHECKSUM    3100-FFDF       The linker places the checksum byte(s) in this segment,
+//                              when the -J linker command line option is used.
+//                                  
+//  INTVEC      FFC0-FFFF       Interrupt vectors
+//
+//  NOTE:
+//  It is not possible to pack the CSTART segment by using the XLINK -P option
+//  Special function registers and peripheral modules occupy addresses 0-01FFh
+//  Be sure to use end values for the defined addresses
+//*****************************************************************
+
+// -------------------------------------------------------------------
+// Stack size and heap size
+// -------------------------------------------------------------------
+
+// Uncomment for command line use
+//-D_STACK_SIZE=200
+//-D_HEAP_SIZE=300
+
+
+// ---------------------------------------------------------
+// Define cpu.
+//
+
+-cmsp430
+
+
+// ---------------------------------------------------------
+// RAM memory.
+//
+
+-Z(DATA)DATA16_I,DATA16_Z,DATA16_N,HEAP+_HEAP_SIZE=1160-3100
+-Z(DATA)CSTACK+_STACK_SIZE#
+
+
+// ---------------------------------------------------------
+// Read only memory.
+//
+
+// -------------------------------------------------------------------
+//  Information memory (FLASH)
+// -------------------------------------------------------------------
+
+-Z(CODE)INFO=1000-10FF
+-Z(CODE)INFOA=1080-10FF
+-Z(CODE)INFOB=1000-107F
+
+// -----------------------------------------------
+// Constant data.
+
+//-Z(CONST)DATA16_C,DATA16_ID,DIFUNCT=3100-FFBE
+-Z(CONST)DATA16_C,DATA16_ID,DIFUNCT=3100-FBFE
+// -----------------------------------------------
+// Code.
+
+-Z(CODE)CSTART,ISR_CODE,IVCODE=3100-FBFF
+-Z(CODE)UPINTSEG=FC10-FDFF
+-Z(CODE)CRCSEG=FD20-FDFF
+-P(CODE)CODE=3100-FBFF,10000-1FFFF
+-Z(CODE)UPDATESEG=1D000-1FFFF
+
+//-Z(CODE)CSTART,ISR_CODE,IVCODE=1D080-1F000
+//-P(CODE)CODE=1D080-1FFFF
+
+// -----------------------------------------------
+// Interrupt vector.
+
+-Z(CODE)INTVEC=FFC0-FFFF
+-Z(CODE)RESET=FFFE-FFFF
+
+// ---------------------------------------------------------
+// The end.
+//
